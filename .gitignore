@@ -1,0 +1,38 @@
+# Ignore build directory
+/build/
+
+# Ignore CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Ignore executables
+*.exe
+*.out
+*.o
+*.obj
+*.lib
+*.dll
+*.pdb
+*.ilk
+*.idb
+*.log
+*.pch
+*.pdb
+*.sdf
+*.ipch
+*.tlog
+*.lastbuildstate
+*.vcxproj*
+*.opensdf
+*.suo
+*.user
+*.userosscache
+*.userprefs
+*.ncb
+*.sln
+*.suo
+*.vcproj*
+*.vcxproj*
+*.filters
