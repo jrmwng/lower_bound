@@ -176,50 +176,46 @@ namespace jrmwng
                     }
 
                     template <size_t... zuELEMENT_i>
-                    int apply(simd_type const &lhs, simd_type const &rhs, std::index_sequence<zuELEMENT_i...>) const
+                    int apply(simd_type const &lhs, T const &tRHS, std::index_sequence<zuELEMENT_i...>) const
                     {
                         return
-                            ((std::invoke(compare, simd_traits<T>::extract<zuELEMENT_i>(lhs), simd_traits<T>::extract<zuELEMENT_i>(rhs)) ? (0x01 << zuELEMENT_i) : 0) | ... | 0);
+                            ((std::invoke(compare, simd_traits<T>::extract<zuELEMENT_i>(lhs), tRHS) ? (0x01 << zuELEMENT_i) : 0) | ... | 0);
                     }
 
-                    int operator() (simd_type const &lhs, simd_type const &rhs) const
+                    int operator() (simd_type const &lhs, T const &tRHS) const
                     {
                         if constexpr (std::is_invocable_r_v<int, Tcompare, simd_type, simd_type>)
                         {
-                            return std::invoke(compare, lhs, rhs);
+                            return std::invoke(compare, lhs, simd_traits<T>::set1(tRHS));
                         }
                         else if constexpr (std::is_same_v<Tcompare, std::less<T>>)
                         {
-                            return simd_traits<T>::cmp_lt(lhs, rhs);
+                            return simd_traits<T>::cmp_lt(lhs, simd_traits<T>::set1(tRHS));
                         }
                         else if constexpr (std::is_same_v<Tcompare, std::less_equal<T>>)
                         {
-                            return simd_traits<T>::cmp_le(lhs, rhs);
+                            return simd_traits<T>::cmp_le(lhs, simd_traits<T>::set1(tRHS));
                         }
                         else if constexpr (std::is_same_v<Tcompare, std::greater<T>>)
                         {
-                            return simd_traits<T>::cmp_gt(lhs, rhs);
+                            return simd_traits<T>::cmp_gt(lhs, simd_traits<T>::set1(tRHS));
                         }
                         else if constexpr (std::is_same_v<Tcompare, std::greater_equal<T>>)
                         {
-                            return simd_traits<T>::cmp_ge(lhs, rhs);
+                            return simd_traits<T>::cmp_ge(lhs, simd_traits<T>::set1(tRHS));
                         }
                         else
                         {
-                            return apply(lhs, rhs, typename simd_traits<T>::index_sequence_type{});
+                            return apply(lhs, tRHS, typename simd_traits<T>::index_sequence_type{});
                         }
-                    }
-                    int operator() (simd_type const &lhs, T const tRHS) const
-                    {
-                        return operator()(lhs, simd_traits<T>::set1(tRHS));
                     }
 
                     template <typename... Ts, size_t zuOFFSET, size_t... zuELEMENT_i>
-                    int apply(std::tuple<Ts...> const &tupleLHS, T const tRHS, std::integral_constant<size_t, zuOFFSET>, std::index_sequence<zuELEMENT_i...>) const
+                    int apply(std::tuple<Ts...> const &tupleLHS, T const &tRHS, std::integral_constant<size_t, zuOFFSET>, std::index_sequence<zuELEMENT_i...>) const
                     {
                         if constexpr (std::is_same_v<std::index_sequence<zuELEMENT_i...>, std::make_index_sequence<8>>)
                         {
-                            return operator()(simd_traits<T>::setr(std::get<zuOFFSET + zuELEMENT_i>(tupleLHS)...), simd_traits<T>::set1(tRHS)) << zuOFFSET;
+                            return operator()(simd_traits<T>::setr(std::get<zuOFFSET + zuELEMENT_i>(tupleLHS)...), tRHS) << zuOFFSET;
                         }
                         else
                         {
@@ -227,12 +223,12 @@ namespace jrmwng
                         }
                     }
                     template <typename... Ts, size_t... zuOFFSET8>
-                    int apply(std::tuple<Ts...> const &tupleLHS, T const tRHS, std::index_sequence<zuOFFSET8...>) const
+                    int apply(std::tuple<Ts...> const &tupleLHS, T const &tRHS, std::index_sequence<zuOFFSET8...>) const
                     {
                         return (0 | ... | apply(tupleLHS, tRHS, std::integral_constant<size_t, zuOFFSET8 * simd_traits<T>::simd_size_v>{}, std::make_index_sequence<std::min(simd_traits<T>::simd_size_v, sizeof...(Ts) - (zuOFFSET8 * simd_traits<T>::simd_size_v))>{}));
                     }
                     template <typename... Ts>
-                    int operator() (std::tuple<Ts...> const &tupleLHS, T const tRHS) const
+                    int operator() (std::tuple<Ts...> const &tupleLHS, T const &tRHS) const
                     {
                         static_assert(sizeof...(Ts) <= 32, "Invalid tuple size");
 
