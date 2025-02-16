@@ -147,6 +147,55 @@ int main() {
 }
 ```
 
+#### Using SIMD with Vectorizable Projection
+
+```cpp
+#include <vector>
+#include <iostream>
+#include "lower_bound_simd.hpp"
+
+struct SquareProjection
+{
+    template <typename T>
+    T operator()(T value) const
+    {
+        return value * value;
+    }
+
+    __m256 operator()(__m256 value) const
+    {
+        return _mm256_mul_ps(value, value);
+    }
+
+    __m256i operator()(__m256i value) const
+    {
+        return _mm256_mullo_epi32(value, value);
+    }
+
+    __m256d operator()(__m256d value) const
+    {
+        return _mm256_mul_pd(value, value);
+    }
+};
+
+int main()
+{
+    std::vector<float> vec = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f};
+
+    float value = 4.5f;
+
+    // Using SIMD-optimized lower_bound
+    auto simd_it = jrmwng::algorithm::simd::lower_bound(vec, value, std::less<float>(), SquareProjection{});
+    std::cout << "SIMD lower_bound position: " << std::distance(vec.begin(), simd_it) << std::endl;
+
+    // Using standard lower_bound
+    auto std_it = std::ranges::lower_bound(vec, value, std::less<float>(), SquareProjection{});
+    std::cout << "Standard lower_bound position: " << std::distance(vec.begin(), std_it) << std::endl;
+
+    return 0;
+}
+```
+
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for more details.
