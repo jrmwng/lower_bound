@@ -356,7 +356,7 @@ namespace jrmwng
              * 
              * @example
              * std::vector<int> vec = {1, 2, 4, 5, 6};
-             * auto it = jrmwng::algorithm::lower_bound(vec, 3, std::less<int>(), [](int x) { return x; });
+             * auto it = jrmwng::algorithm::simd::lower_bound(vec, 3, std::less<int>(), [](int x) { return x; });
              * // it points to vec.begin() + 2
              */
             template <typename Range, typename T, typename Compare = std::less<T>, typename Projection = std::identity>
