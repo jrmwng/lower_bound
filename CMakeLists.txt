@@ -12,6 +12,7 @@ add_executable(lower_bound_tests tests/test_lower_bound.cpp)
 add_executable(lower_bound_tests_simd tests/test_lower_bound_simd.cpp)
 
 # Add Google Test
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_subdirectory(googletest)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
