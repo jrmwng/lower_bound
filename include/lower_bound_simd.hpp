@@ -182,27 +182,40 @@ namespace jrmwng
                             ((std::invoke(compare, simd_traits<T>::extract<zuELEMENT_i>(lhs), tRHS) ? (0x01 << zuELEMENT_i) : 0) | ... | 0);
                     }
 
+                    constexpr static bool is_simd_compare_v = std::is_invocable_r_v<int, Tcompare, simd_type, simd_type>
+                        || std::is_same_v<Tcompare, std::less<T>>
+                        || std::is_same_v<Tcompare, std::less_equal<T>>
+                        || std::is_same_v<Tcompare, std::greater<T>>
+                        || std::is_same_v<Tcompare, std::greater_equal<T>>;
+
                     int operator() (simd_type const &lhs, T const &tRHS) const
                     {
-                        if constexpr (std::is_invocable_r_v<int, Tcompare, simd_type, simd_type>)
+                        if constexpr (is_simd_compare_v)
                         {
-                            return std::invoke(compare, lhs, simd_traits<T>::set1(tRHS));
-                        }
-                        else if constexpr (std::is_same_v<Tcompare, std::less<T>>)
-                        {
-                            return simd_traits<T>::cmp_lt(lhs, simd_traits<T>::set1(tRHS));
-                        }
-                        else if constexpr (std::is_same_v<Tcompare, std::less_equal<T>>)
-                        {
-                            return simd_traits<T>::cmp_le(lhs, simd_traits<T>::set1(tRHS));
-                        }
-                        else if constexpr (std::is_same_v<Tcompare, std::greater<T>>)
-                        {
-                            return simd_traits<T>::cmp_gt(lhs, simd_traits<T>::set1(tRHS));
-                        }
-                        else if constexpr (std::is_same_v<Tcompare, std::greater_equal<T>>)
-                        {
-                            return simd_traits<T>::cmp_ge(lhs, simd_traits<T>::set1(tRHS));
+                            if constexpr (std::is_invocable_r_v<int, Tcompare, simd_type, simd_type>)
+                            {
+                                return std::invoke(compare, lhs, simd_traits<T>::set1(tRHS));
+                            }
+                            else if constexpr (std::is_same_v<Tcompare, std::less<T>>)
+                            {
+                                return simd_traits<T>::cmp_lt(lhs, simd_traits<T>::set1(tRHS));
+                            }
+                            else if constexpr (std::is_same_v<Tcompare, std::less_equal<T>>)
+                            {
+                                return simd_traits<T>::cmp_le(lhs, simd_traits<T>::set1(tRHS));
+                            }
+                            else if constexpr (std::is_same_v<Tcompare, std::greater<T>>)
+                            {
+                                return simd_traits<T>::cmp_gt(lhs, simd_traits<T>::set1(tRHS));
+                            }
+                            else if constexpr (std::is_same_v<Tcompare, std::greater_equal<T>>)
+                            {
+                                return simd_traits<T>::cmp_ge(lhs, simd_traits<T>::set1(tRHS));
+                            }
+                            else
+                            {
+                                static_assert(false, "Inconsistent `is_simd_compare_v`");
+                            }
                         }
                         else
                         {
@@ -213,7 +226,7 @@ namespace jrmwng
                     template <typename... Ts, size_t zuOFFSET, size_t... zuELEMENT_i>
                     int apply(std::tuple<Ts...> const &tupleLHS, T const &tRHS, std::integral_constant<size_t, zuOFFSET>, std::index_sequence<zuELEMENT_i...>) const
                     {
-                        if constexpr (std::is_same_v<std::index_sequence<zuELEMENT_i...>, std::make_index_sequence<8>>)
+                        if constexpr (std::is_same_v<std::index_sequence<zuELEMENT_i...>, std::make_index_sequence<8>> && is_simd_compare_v)
                         {
                             return operator()(simd_traits<T>::setr(std::get<zuOFFSET + zuELEMENT_i>(tupleLHS)...), tRHS) << zuOFFSET;
                         }
