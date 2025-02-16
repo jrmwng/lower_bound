@@ -1,9 +1,12 @@
 #pragma once
 
-#include <ranges>
-#include <functional>
-#include <utility>
-#include <bit>
+#include <vector>         // For std::vector
+#include <functional>     // For std::less, std::identity, std::invoke
+#include <ranges>         // For std::ranges::forward_range, std::ranges::iterator_t, std::ranges::begin, std::ranges::end
+#include <iterator>       // For std::distance
+#include <type_traits>    // For std::is_same_v, std::make_index_sequence
+#include <bit>            // For std::popcount
+#include <utility>        // For std::index_sequence
 
 /**
  * @file lower_bound.hpp

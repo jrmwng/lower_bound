@@ -1,8 +1,12 @@
 #pragma once
 
-#include "lower_bound.hpp"
-#include <bit>
-#include <immintrin.h>
+#include "lower_bound.hpp"  // Project-specific header for lower_bound functionality
+
+#include <immintrin.h>      // for __m256, __m256i, __m256d and associated intrinsics
+#include <utility>          // for std::make_index_sequence, std::index_sequence
+#include <functional>       // for std::invoke, std::less, std::less_equal, std::greater, std::greater_equal, std::identity
+#include <type_traits>      // for std::is_invocable_v, std::is_invocable_r_v
+#include <ranges>           // for std::ranges::forward_range, std::ranges::iterator_t
 
 /**
  * @file lower_bound_simd.hpp
