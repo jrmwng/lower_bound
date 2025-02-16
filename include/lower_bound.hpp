@@ -90,7 +90,6 @@ namespace jrmwng
              * @param value The value to search for.
              * @param comp The comparison function.
              * @param proj The projection function.
-             * @param seq The index sequence for partitioning.
              * @return An iterator to the lower bound of the value in the range.
              * 
              * @details The comparison function should return a bitmask indicating partitions that satisfy the comparison.
