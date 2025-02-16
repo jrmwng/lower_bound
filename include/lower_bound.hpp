@@ -95,7 +95,7 @@ namespace jrmwng
              */
             template <typename Range, typename T, typename Compare, typename Projection, size_t... zuPARTITION_i>
             requires std::ranges::forward_range<Range>
-            std::ranges::iterator_t<Range> lower_bound(Range & r, const T& value, Compare comp, Projection proj, std::index_sequence<zuPARTITION_i...>)
+            std::ranges::iterator_t<Range> lower_bound(Range && r, const T& value, Compare comp, Projection proj, std::index_sequence<zuPARTITION_i...>)
             {
                 static_assert(std::is_same_v<std::index_sequence<zuPARTITION_i...>, std::make_index_sequence<sizeof...(zuPARTITION_i)>>, "Invalid index sequence");
 //                static_assert(sizeof...(zuPARTITION_i) == 1 || std::is_same_v<int, decltype(comp(value, value))>, "Invalid comparison function");
@@ -165,9 +165,9 @@ namespace jrmwng
              */
             template <typename Range, typename T, typename Compare = std::less<T>, typename Projection = std::identity>
             requires std::ranges::forward_range<Range>
-            std::ranges::iterator_t<Range> lower_bound(Range & r, T const & value, Compare comp = {}, Projection proj = {})
+            std::ranges::iterator_t<Range> lower_bound(Range && r, T const & value, Compare comp = {}, Projection proj = {})
             {
-                return jrmwng::algorithm::ranges::lower_bound(r, value, comp, proj, std::make_index_sequence<1>{});
+                return jrmwng::algorithm::ranges::lower_bound(std::forward<Range>(r), value, comp, proj, std::make_index_sequence<1>{});
             }
         }
     }

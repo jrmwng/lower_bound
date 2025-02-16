@@ -128,6 +128,80 @@ TEST(LowerBoundTest, RangeBasedAllElementsEqual) {
     }
 }
 
+TEST(LowerBoundTest, RValueReferenceIntegers) {
+    std::vector<int> vec = {1, 2, 4, 5, 6};
+    std::vector<int> test_values = {3, 0, 7};
+    std::vector<size_t> expected_indices = {2, 0, 5};
+    for (size_t i = 0; i < test_values.size(); ++i) {
+        auto it = jrmwng::algorithm::ranges::lower_bound(std::move(vec), test_values[i], std::less<int>());
+        EXPECT_EQ(it, vec.begin() + expected_indices[i]);
+    }
+}
+
+TEST(LowerBoundTest, RValueReferenceDoubles) {
+    std::vector<double> vec_d = {1.1, 2.2, 4.4, 5.5, 6.6};
+    std::vector<double> test_values_d = {3.3, 0.0, 7.7};
+    std::vector<size_t> expected_indices_d = {2, 0, 5};
+    for (size_t i = 0; i < test_values_d.size(); ++i) {
+        auto it_d = jrmwng::algorithm::ranges::lower_bound(std::move(vec_d), test_values_d[i], std::less<double>());
+        EXPECT_EQ(it_d, vec_d.begin() + expected_indices_d[i]);
+    }
+}
+
+TEST(LowerBoundTest, RValueReferenceCustomPredicate) {
+    struct CustomType {
+        int value;
+        bool operator<(const CustomType& other) const {
+            return value < other.value;
+        }
+    };
+
+    std::vector<CustomType> custom_vec = {{1}, {3}, {5}};
+    std::vector<CustomType> test_values_custom = {{4}, {0}, {6}};
+    std::vector<size_t> expected_indices_custom = {2, 0, 3};
+    for (size_t i = 0; i < test_values_custom.size(); ++i) {
+        auto it_custom = jrmwng::algorithm::ranges::lower_bound(std::move(custom_vec), test_values_custom[i], std::less<CustomType>());
+        EXPECT_EQ(it_custom, custom_vec.begin() + expected_indices_custom[i]);
+    }
+}
+
+TEST(LowerBoundTest, RangeBasedRValueReferenceIntegers) {
+    std::vector<int> vec = {1, 2, 4, 5, 6};
+    std::vector<int> test_values = {3, 0, 7};
+    std::vector<size_t> expected_indices = {2, 0, 5};
+    for (size_t i = 0; i < test_values.size(); ++i) {
+        auto it_range = jrmwng::algorithm::ranges::lower_bound(std::move(vec), test_values[i], std::less<int>(), [](int i) { return i; });
+        EXPECT_EQ(it_range, vec.begin() + expected_indices[i]);
+    }
+}
+
+TEST(LowerBoundTest, RangeBasedRValueReferenceDoubles) {
+    std::vector<double> vec_d = {1.1, 2.2, 4.4, 5.5, 6.6};
+    std::vector<double> test_values_d = {3.3, 0.0, 7.7};
+    std::vector<size_t> expected_indices_d = {2, 0, 5};
+    for (size_t i = 0; i < test_values_d.size(); ++i) {
+        auto it_d_range = jrmwng::algorithm::ranges::lower_bound(std::move(vec_d), test_values_d[i], std::less<double>(), [](double d) { return d; });
+        EXPECT_EQ(it_d_range, vec_d.begin() + expected_indices_d[i]);
+    }
+}
+
+TEST(LowerBoundTest, RangeBasedRValueReferenceCustomPredicate) {
+    struct CustomType {
+        int value;
+        bool operator<(const CustomType& other) const {
+            return value < other.value;
+        }
+    };
+
+    std::vector<CustomType> custom_vec = {{1}, {3}, {5}};
+    std::vector<CustomType> test_values_custom = {{4}, {0}, {6}};
+    std::vector<size_t> expected_indices_custom = {2, 0, 3};
+    for (size_t i = 0; i < test_values_custom.size(); ++i) {
+        auto it_custom_range = jrmwng::algorithm::ranges::lower_bound(std::move(custom_vec), test_values_custom[i], std::less<CustomType>(), [](const CustomType& ct) { return ct; });
+        EXPECT_EQ(it_custom_range, custom_vec.begin() + expected_indices_custom[i]);
+    }
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

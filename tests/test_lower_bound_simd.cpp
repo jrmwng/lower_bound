@@ -193,6 +193,58 @@ TEST(LowerBoundSimdTest, SimdProjectionDoubles) {
     EXPECT_EQ(it_simd_proj_double, vec_double.begin() + 2);
 }
 
+TEST(LowerBoundSimdTest, RValueReferenceIntegers) {
+    std::vector<int> vec = {1, 2, 4, 5, 6};
+    auto it_simd = jrmwng::algorithm::simd::lower_bound(std::move(vec), 3);
+    EXPECT_EQ(it_simd, vec.begin() + 2);
+}
+
+TEST(LowerBoundSimdTest, RValueReferenceDoubles) {
+    std::vector<double> vec_d = {1.1, 2.2, 4.4, 5.5, 6.6};
+    auto it_d_simd = jrmwng::algorithm::simd::lower_bound(std::move(vec_d), 3.3);
+    EXPECT_EQ(it_d_simd, vec_d.begin() + 2);
+}
+
+TEST(LowerBoundSimdTest, RValueReferenceCustomPredicate) {
+    struct CustomType {
+        int value;
+        bool operator<(const CustomType& other) const {
+            return value < other.value;
+        }
+    };
+
+    std::vector<CustomType> custom_vec = {{1}, {3}, {5}};
+    CustomType new_value = {4};
+    auto it_custom_simd = jrmwng::algorithm::simd::lower_bound(std::move(custom_vec), new_value, std::less<CustomType>());
+    EXPECT_EQ(it_custom_simd, custom_vec.begin() + 2);
+}
+
+TEST(LowerBoundSimdTest, RangeBasedRValueReferenceIntegers) {
+    std::vector<int> vec = {1, 2, 4, 5, 6};
+    auto it_simd = jrmwng::algorithm::simd::lower_bound(std::move(vec), 3, std::less<int>(), [](int i) { return i; });
+    EXPECT_EQ(it_simd, vec.begin() + 2);
+}
+
+TEST(LowerBoundSimdTest, RangeBasedRValueReferenceDoubles) {
+    std::vector<double> vec_d = {1.1, 2.2, 4.4, 5.5, 6.6};
+    auto it_d_simd = jrmwng::algorithm::simd::lower_bound(std::move(vec_d), 3.3, std::less<double>(), [](double d) { return d; });
+    EXPECT_EQ(it_d_simd, vec_d.begin() + 2);
+}
+
+TEST(LowerBoundSimdTest, RangeBasedRValueReferenceCustomPredicate) {
+    struct CustomType {
+        int value;
+        bool operator<(const CustomType& other) const {
+            return value < other.value;
+        }
+    };
+
+    std::vector<CustomType> custom_vec = {{1}, {3}, {5}};
+    CustomType new_value = {4};
+    auto it_custom_simd = jrmwng::algorithm::simd::lower_bound(std::move(custom_vec), new_value, std::less<CustomType>(), [](const CustomType& ct) { return ct; });
+    EXPECT_EQ(it_custom_simd, custom_vec.begin() + 2);
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

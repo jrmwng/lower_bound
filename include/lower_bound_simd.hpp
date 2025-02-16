@@ -297,7 +297,7 @@ namespace jrmwng
              */
             template <typename Range, typename T, typename Compare = std::less<T>, typename Projection = std::identity>
             requires std::ranges::forward_range<Range>
-            std::ranges::iterator_t<Range> lower_bound(Range & r, T const & value, Compare comp = {}, Projection proj = {})
+            std::ranges::iterator_t<Range> lower_bound(Range && r, T const & value, Compare comp = {}, Projection proj = {})
             {
                 using Tinput = typename std::ranges::range_value_t<Range>;
 
