@@ -170,11 +170,27 @@ namespace jrmwng
 
                     Tcompare compare;
 
+                    /**
+                     * @brief Compares two scalar values using the comparison function.
+                     * 
+                     * @param lhs The left-hand side value.
+                     * @param rhs The right-hand side value.
+                     * @return int The result of the comparison.
+                     */
                     int operator() (T const lhs, T const rhs) const
                     {
                         return std::invoke(compare, lhs, rhs);
                     }
 
+                    /**
+                     * @brief Applies the comparison function to each element of the SIMD vector and a scalar value.
+                     * 
+                     * @tparam zuELEMENT_i The indices of the elements in the SIMD vector.
+                     * @param lhs The SIMD vector.
+                     * @param tRHS The scalar value.
+                     * @param std::index_sequence<zuELEMENT_i...> The index sequence.
+                     * @return int The result of the comparison.
+                     */
                     template <size_t... zuELEMENT_i>
                     int apply(simd_type const &lhs, T const &tRHS, std::index_sequence<zuELEMENT_i...>) const
                     {
@@ -182,12 +198,22 @@ namespace jrmwng
                             ((std::invoke(compare, simd_traits<T>::extract<zuELEMENT_i>(lhs), tRHS) ? (0x01 << zuELEMENT_i) : 0) | ... | 0);
                     }
 
+                    /**
+                     * @brief Checks if the comparison function can be applied to SIMD types.
+                     */
                     constexpr static bool is_simd_compare_v = std::is_invocable_r_v<int, Tcompare, simd_type, simd_type>
                         || std::is_same_v<Tcompare, std::less<T>>
                         || std::is_same_v<Tcompare, std::less_equal<T>>
                         || std::is_same_v<Tcompare, std::greater<T>>
                         || std::is_same_v<Tcompare, std::greater_equal<T>>;
 
+                    /**
+                     * @brief Compares a SIMD vector and a scalar value using the comparison function.
+                     * 
+                     * @param lhs The SIMD vector.
+                     * @param tRHS The scalar value.
+                     * @return int The result of the comparison.
+                     */
                     int operator() (simd_type const &lhs, T const &tRHS) const
                     {
                         if constexpr (is_simd_compare_v)
@@ -223,6 +249,16 @@ namespace jrmwng
                         }
                     }
 
+                    /**
+                     * @brief Applies the comparison function to each element of a tuple and a scalar value.
+                     * 
+                     * @tparam Ts The types of the elements in the tuple.
+                     * @tparam zuOFFSET The offset in the tuple.
+                     * @tparam zuELEMENT_i The indices of the elements in the tuple.
+                     * @param tupleLHS The tuple.
+                     * @param tRHS The scalar value.
+                     * @return int The result of the comparison.
+                     */
                     template <typename... Ts, size_t zuOFFSET, size_t... zuELEMENT_i>
                     int apply(std::tuple<Ts...> const &tupleLHS, T const &tRHS, std::integral_constant<size_t, zuOFFSET>, std::index_sequence<zuELEMENT_i...>) const
                     {
@@ -235,11 +271,30 @@ namespace jrmwng
                             return ((std::invoke(compare, std::get<zuOFFSET + zuELEMENT_i>(tupleLHS), tRHS) ? (0x01 << (zuOFFSET + zuELEMENT_i)) : 0) | ... | 0);
                         }
                     }
+
+                    /**
+                     * @brief Applies the comparison function to each element of a tuple and a scalar value.
+                     * 
+                     * @tparam Ts The types of the elements in the tuple.
+                     * @tparam zuOFFSET8 The offsets in the tuple.
+                     * @param tupleLHS The tuple.
+                     * @param tRHS The scalar value.
+                     * @return int The result of the comparison.
+                     */
                     template <typename... Ts, size_t... zuOFFSET8>
                     int apply(std::tuple<Ts...> const &tupleLHS, T const &tRHS, std::index_sequence<zuOFFSET8...>) const
                     {
                         return (0 | ... | apply(tupleLHS, tRHS, std::integral_constant<size_t, zuOFFSET8 * simd_traits<T>::simd_size_v>{}, std::make_index_sequence<std::min(simd_traits<T>::simd_size_v, sizeof...(Ts) - (zuOFFSET8 * simd_traits<T>::simd_size_v))>{}));
                     }
+
+                    /**
+                     * @brief Compares each element of a tuple and a scalar value using the comparison function.
+                     * 
+                     * @tparam Ts The types of the elements in the tuple.
+                     * @param tupleLHS The tuple.
+                     * @param tRHS The scalar value.
+                     * @return int The result of the comparison.
+                     */
                     template <typename... Ts>
                     int operator() (std::tuple<Ts...> const &tupleLHS, T const &tRHS) const
                     {
@@ -310,6 +365,9 @@ namespace jrmwng
             {
                 using Tinput = typename std::ranges::range_value_t<Range>;
 
+                /**
+                 * @brief Specialization for float and int types.
+                 */
                 if constexpr (std::is_same_v<float, T> || std::is_same_v<int, T>)
                 {
                     if constexpr (std::is_invocable_v<Projection, Tinput, Tinput, Tinput, Tinput, Tinput, Tinput, Tinput, Tinput>)
@@ -329,6 +387,9 @@ namespace jrmwng
                         return jrmwng::algorithm::ranges::lower_bound(r, value, comp, proj, std::make_index_sequence<1>{});
                     }
                 }
+                /**
+                 * @brief Specialization for double type.
+                 */
                 else if constexpr (std::is_same_v<double, T>)
                 {
                     if constexpr (std::is_invocable_v<Projection, Tinput, Tinput, Tinput, Tinput>)
@@ -344,6 +405,9 @@ namespace jrmwng
                         return jrmwng::algorithm::ranges::lower_bound(r, value, comp, proj, std::make_index_sequence<1>{});
                     }
                 }
+                /**
+                 * @brief Default case for other types.
+                 */
                 else
                 {
                     return jrmwng::algorithm::ranges::lower_bound(r, value, comp, proj, std::make_index_sequence<1>{});
