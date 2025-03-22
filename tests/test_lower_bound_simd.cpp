@@ -2,6 +2,30 @@
 #include <vector>
 #include "lower_bound_simd.hpp"
 
+struct SquareProjection
+{
+    template <typename T>
+    T operator()(T value) const
+    {
+        return value * value;
+    }
+
+    __m256 operator()(__m256 value) const
+    {
+        return _mm256_mul_ps(value, value);
+    }
+
+    __m256i operator()(__m256i value) const
+    {
+        return _mm256_mullo_epi32(value, value);
+    }
+
+    __m256d operator()(__m256d value) const
+    {
+        return _mm256_mul_pd(value, value);
+    }
+};
+
 TEST(LowerBoundSimdTest, Integers) {
     std::vector<int> vec = {1, 2, 4, 5, 6};
     auto it_simd = jrmwng::algorithm::simd::lower_bound(vec, 3);
@@ -243,6 +267,66 @@ TEST(LowerBoundSimdTest, RangeBasedRValueReferenceCustomPredicate) {
     CustomType new_value = {4};
     auto it_custom_simd = jrmwng::algorithm::simd::lower_bound(std::move(custom_vec), new_value, std::less<CustomType>(), [](const CustomType& ct) { return ct; });
     EXPECT_EQ(it_custom_simd, custom_vec.begin() + 2);
+}
+
+TEST(LowerBoundSimdTest, SquareProjectionIntegers) {
+    std::vector<int> vec = {1, 2, 4, 5, 6};
+    std::vector<int> vec2 = {1, 4, 16, 25, 36};
+    std::vector<int> test_values = {0, 1, 3, 4, 7};
+
+    for (size_t i = 0; i < test_values.size(); ++i) {
+        auto it_simd = jrmwng::algorithm::simd::lower_bound(vec, test_values[i], std::less<int>(), SquareProjection{});
+        auto it_simd2 = jrmwng::algorithm::simd::lower_bound(vec2, test_values[i], std::less<int>());
+        EXPECT_EQ(std::distance(vec.begin(), it_simd), std::distance(vec2.begin(), it_simd2));
+    }
+}
+
+TEST(LowerBoundSimdTest, SquareProjectionFloats) {
+    std::vector<float> vec = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f};
+    std::vector<float> vec2 = {1.0f, 4.0f, 9.0f, 16.0f, 25.0f, 36.0f, 49.0f, 64.0f};
+    std::vector<float> test_values = {0.5f, 1.5f, 2.5f, 4.5f, 8.5f};
+
+    for (size_t i = 0; i < test_values.size(); ++i) {
+        auto it_simd = jrmwng::algorithm::simd::lower_bound(vec, test_values[i], std::less<float>(), SquareProjection{});
+        auto it_simd2 = jrmwng::algorithm::simd::lower_bound(vec2, test_values[i], std::less<float>());
+        EXPECT_EQ(std::distance(vec.begin(), it_simd), std::distance(vec2.begin(), it_simd2));
+    }
+}
+
+TEST(LowerBoundSimdTest, SquareProjectionDoubles) {
+    std::vector<double> vec = {1.1, 2.2, 4.4, 5.5, 6.6};
+    std::vector<double> vec2 = {1.1*1.1,2.2*2.2,4.4*4.4,5.5*5.5,6.6*6.6};
+    std::vector<double> test_values = {0.5, 1.5, 3.3, 4.5, 7.7};
+
+    for (size_t i = 0; i < test_values.size(); ++i) {
+        auto it_simd = jrmwng::algorithm::simd::lower_bound(vec, test_values[i], std::less<double>(), SquareProjection{});
+        auto it_simd2 = jrmwng::algorithm::simd::lower_bound(vec2, test_values[i], std::less<double>());
+        EXPECT_EQ(std::distance(vec.begin(), it_simd), std::distance(vec2.begin(), it_simd2));
+    }
+}
+
+TEST(LowerBoundSimdTest, SquareProjectionNegativeIntegers) {
+    std::vector<int> vec = {-4, -2, 0, 2, 4};
+    std::vector<int> vec2 = {16,4,0,4,16};
+    std::vector<int> test_values = {-16, -4, 1, 4, 16};
+
+    for (size_t i = 0; i < test_values.size(); ++i) {
+        auto it_simd = jrmwng::algorithm::simd::lower_bound(vec, test_values[i], std::less<int>(), SquareProjection{});
+        auto it_simd2 = jrmwng::algorithm::simd::lower_bound(vec2, test_values[i], std::less<int>());
+        EXPECT_EQ(std::distance(vec.begin(), it_simd), std::distance(vec2.begin(), it_simd2));
+    }
+}
+
+TEST(LowerBoundSimdTest, SquareProjectionMixedIntegers) {
+    std::vector<int> vec = {-3, -1, 0, 1, 3};
+    std::vector<int> vec2 = {9,1,0,1,9};
+    std::vector<int> test_values = {-9, -1, 0, 1, 9};
+
+    for (size_t i = 0; i < test_values.size(); ++i) {
+        auto it_simd = jrmwng::algorithm::simd::lower_bound(vec, test_values[i], std::less<int>(), SquareProjection{});
+        auto it_simd2 = jrmwng::algorithm::simd::lower_bound(vec2, test_values[i], std::less<int>());
+        EXPECT_EQ(std::distance(vec.begin(), it_simd), std::distance(vec2.begin(), it_simd2));
+    }
 }
 
 int main(int argc, char **argv) {

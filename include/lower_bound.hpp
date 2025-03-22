@@ -105,7 +105,7 @@ namespace jrmwng
                 Titerator first = std::ranges::begin(r); // Initialize the first iterator
                 Titerator last = std::ranges::end(r); // Initialize the last iterator
         
-                while (first != last) // Loop until the range is exhausted
+                while (first < last) // Loop until the range is exhausted
                 {
                     // Create an array to hold iterators at partition points
                     Titerator const iters[]
