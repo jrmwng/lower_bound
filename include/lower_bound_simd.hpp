@@ -7,6 +7,7 @@
 #include <functional>       // for std::invoke, std::less, std::less_equal, std::greater, std::greater_equal, std::identity
 #include <type_traits>      // for std::is_invocable_v, std::is_invocable_r_v
 #include <ranges>           // for std::ranges::forward_range, std::ranges::iterator_t
+#include <cstdint>          // for int64_t
 
 /**
  * @file lower_bound_simd.hpp
@@ -115,7 +116,7 @@ namespace jrmwng
                     {
                         // Extract using extractf128 and _mm_extract_epi64
                         __m128d lane = (nINDEX < 2) ? _mm256_extractf128_pd(lhs, 0) : _mm256_extractf128_pd(lhs, 1);
-                        __int64 i = _mm_extract_epi64(_mm_castpd_si128(lane), nINDEX % 2);
+                        int64_t i = _mm_extract_epi64(_mm_castpd_si128(lane), nINDEX % 2);
                         return *reinterpret_cast<double*>(&i);
                     }
                 };
