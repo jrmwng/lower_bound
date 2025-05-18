@@ -1,0 +1,232 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Configure CMake (MSVC)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-B",
+                "\"${workspaceFolder}\\build\\msvc\"",
+                "-DCMAKE_CXX_COMPILER=cl",
+                "-DCMAKE_C_COMPILER=cl",
+                "-DCMAKE_BUILD_TYPE=Release",
+                "-S",
+                "\"${workspaceFolder}\""
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "presentation": {
+                "group": "compiler-tasks"
+            }
+        },
+        {
+            "label": "Configure CMake (GCC)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-B",
+                "\"${workspaceFolder}\\build\\gcc\"",
+                "-DCMAKE_CXX_COMPILER=g++",
+                "-DCMAKE_C_COMPILER=gcc",
+                "-DCMAKE_BUILD_TYPE=Release",
+                "-S",
+                "\"${workspaceFolder}\""
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "presentation": {
+                "group": "compiler-tasks"
+            }
+        },
+        {
+            "label": "Configure CMake (Clang)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-B",
+                "\"${workspaceFolder}\\build\\clang\"",
+                "-DCMAKE_CXX_COMPILER=clang++",
+                "-DCMAKE_C_COMPILER=clang",
+                "-DCMAKE_BUILD_TYPE=Release",
+                "-S",
+                "\"${workspaceFolder}\""
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "presentation": {
+                "group": "compiler-tasks"
+            }
+        },
+        {
+            "label": "Build (MSVC)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "\"${workspaceFolder}\\build\\msvc\"",
+                "--config",
+                "Release"
+            ],
+            "group": "build",
+            "dependsOn": [
+                "Configure CMake (MSVC)"
+            ],
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "group": "compiler-tasks"
+            }
+        },
+        {
+            "label": "Build (GCC)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "\"${workspaceFolder}\\build\\gcc\"",
+                "--config",
+                "Release"
+            ],
+            "group": "build",
+            "dependsOn": [
+                "Configure CMake (GCC)"
+            ],
+            "problemMatcher": "$gcc",
+            "presentation": {
+                "group": "compiler-tasks"
+            }
+        },
+        {
+            "label": "Build (Clang)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "\"${workspaceFolder}\\build\\clang\"",
+                "--config",
+                "Release"
+            ],
+            "group": "build",
+            "dependsOn": [
+                "Configure CMake (Clang)"
+            ],
+            "problemMatcher": "$gcc",
+            "presentation": {
+                "group": "compiler-tasks"
+            }
+        },
+        {
+            "label": "Test (MSVC)",
+            "type": "shell",
+            "command": "ctest",
+            "args": [
+                "--build-config",
+                "Release",
+                "--output-on-failure"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/build/msvc"
+            },
+            "group": "test",
+            "dependsOn": [
+                "Build (MSVC)"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "group": "compiler-tasks"
+            }
+        },
+        {
+            "label": "Test (GCC)",
+            "type": "shell",
+            "command": "ctest",
+            "args": [
+                "--build-config",
+                "Release",
+                "--output-on-failure"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/build/gcc"
+            },
+            "group": "test",
+            "dependsOn": [
+                "Build (GCC)"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "group": "compiler-tasks"
+            }
+        },
+        {
+            "label": "Test (Clang)",
+            "type": "shell",
+            "command": "ctest",
+            "args": [
+                "--build-config",
+                "Release",
+                "--output-on-failure"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/build/clang"
+            },
+            "group": "test",
+            "dependsOn": [
+                "Build (Clang)"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "group": "compiler-tasks"
+            }
+        },
+        {
+            "label": "MSVC: Configure, Build and Test",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Configure CMake (MSVC)",
+                "Build (MSVC)",
+                "Test (MSVC)"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "GCC: Configure, Build and Test",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Configure CMake (GCC)",
+                "Build (GCC)",
+                "Test (GCC)"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Clang: Configure, Build and Test",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Configure CMake (Clang)",
+                "Build (Clang)",
+                "Test (Clang)"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Run Everything in Parallel",
+            "dependsOrder": "parallel",
+            "dependsOn": [
+                "MSVC: Configure, Build and Test",
+                "GCC: Configure, Build and Test",
+                "Clang: Configure, Build and Test"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}
