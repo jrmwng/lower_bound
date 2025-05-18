@@ -69,7 +69,10 @@ namespace jrmwng
                     template <int nINDEX>
                     static float extract(__m256 const &lhs)
                     {
-                        return _mm256_extract_ps(lhs, nINDEX);
+                        // Extract using extractf128 and _mm_extract_ps
+                        __m128 lane = (nINDEX < 4) ? _mm256_extractf128_ps(lhs, 0) : _mm256_extractf128_ps(lhs, 1);
+                        int i = _mm_extract_ps(lane, nINDEX % 4);
+                        return *reinterpret_cast<float*>(&i);
                     }
                 };
 
@@ -110,7 +113,10 @@ namespace jrmwng
                     template <int nINDEX>
                     static double extract(__m256d const &lhs)
                     {
-                        return _mm256_extract_pd(lhs, nINDEX);
+                        // Extract using extractf128 and _mm_extract_epi64
+                        __m128d lane = (nINDEX < 2) ? _mm256_extractf128_pd(lhs, 0) : _mm256_extractf128_pd(lhs, 1);
+                        __int64 i = _mm_extract_epi64(_mm_castpd_si128(lane), nINDEX % 2);
+                        return *reinterpret_cast<double*>(&i);
                     }
                 };
 
